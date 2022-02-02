@@ -69,14 +69,15 @@ void print_full_ram(RamLine r_lines[MAX_RAM_LINES]){
 void print_full_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     printf("----------------------------------------------------\n");
     for(int i = 0; i < MAX_CACHE_LINES; i++){
-        printf("[%d] | Preenchido: %d | Acessos: %d | Atualizações: %d\n", i, m_cache[i].filled, m_cache[i].acess_count, m_cache[i].update_count);
+        //printf("[%d] | Preenchido: %d | Acessos: %d | Atualizações: %d\n", i, m_cache[i].filled, m_cache[i].acess_count, m_cache[i].update_count);
+        printf("[%d]", i);
         if(m_cache[i].filled == 1){
-            printf("----");
             for(int j = 0; j < MEMORY_BLOCK_SIZE; j++){
-                printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_cache[i].r_lines[j].identificator, m_cache[i].r_lines[j].content, m_cache[i].r_lines[j].blockID);
-                printf("----");
+                //printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_cache[i].r_lines[j].identificator, m_cache[i].r_lines[j].content, m_cache[i].r_lines[j].blockID);
+                printf(" | %d", m_cache[i].r_lines[j].content);
             }
         }
+        printf("\n");
         printf("----------------------------------------------------\n");
     }
     
@@ -165,6 +166,16 @@ void main(){
     initialize_ram(m_ram);
     initialize_cache(m_cache);
     
+    /*
+    m_cache[1].filled = 1;
+    m_cache[1].acess_count = 1;
+    m_cache[1].update_count = 1;
+    m_cache[1].r_lines[0] = m_ram[0];
+    m_cache[1].r_lines[1] = m_ram[1];
+    m_cache[1].r_lines[2] = m_ram[2];
+    m_cache[1].r_lines[3] = m_ram[3];
+    m_cache[1].r_lines[4] = m_ram[4];
+    */
     do{
         resp = main_menu();
 
