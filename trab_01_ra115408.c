@@ -130,6 +130,7 @@ void fill_cache_line(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_L
     }
 }
 
+//Acessar registro da RAM e armazená-lo na memória CACHE
 void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_LINES]){
     int resp = 0, found = 0;
 
@@ -161,6 +162,7 @@ void initialize_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void infos_start(){
     printf("----------------------------------------------------\n");
     printf("\t\t\tSimulador de Memória Cache\n");
