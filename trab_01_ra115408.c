@@ -19,6 +19,7 @@
 typedef struct {
     int content;        // conteudo da linha
     int identificator;  //Identificador da linha dentro da RAM
+    int blockID;          //Identificador do bloco da linha dentro da RAM
 } RamLine;
 
 //Estrutura contendo os dados de UMA linha da memória cache, utilizando um vetor que contém um numero MEMORY_BLOCK_SIZE de linhas provenientes da RAM
@@ -43,9 +44,30 @@ int sort_int(int min, int max){
 void main(){
     RamLine m_ram[MAX_RAM_LINES];
     CacheLine m_cache[MAX_CACHE_LINES];
+    
+    int filled_blocks = 0;
+    int filled_lines = 0;
 
     for(int i = 0; i < MAX_RAM_LINES; i++){
         m_ram[i].content = sort_int(0, MAX_INT_GENERATE);
         m_ram[i].identificator = i;
+        if(filled_lines < MEMORY_BLOCK_SIZE) {
+            filled_lines++;
+            m_ram[i].blockID = filled_blocks;
+        }else{
+            filled_lines = 0;
+            filled_blocks++;
+            m_ram[i].blockID = filled_blocks;
+        }
+    }
+
+    for(int i = 0; i < MAX_CACHE_LINES; i++){
+        m_cache[i].filled = 0;
+        m_cache[i].acess_count = 0;
+        m_cache[i].update_count = 0;
+    }
+
+    for(int i = 0; i < MAX_RAM_LINES; i++){
+        printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_ram[i].identificator, m_ram[i].content, m_ram[i].blockID);
     }
 }
