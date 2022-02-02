@@ -3,14 +3,14 @@
 #include <string.h>
 #include <math.h>
 
-#define MAX_RAM_LINES 1000
+#define MAX_RAM_LINES 100
 #define MEMORY_BLOCK_SIZE 5
 #define MEMORY_BLOCKS (MAX_RAM_LINES / MEMORY_BLOCK_SIZE)
 
 #define MAX_CACHE_LINES 10
 
 #define MIN_INT_GENERATE 100
-#define MAX_INT_GENERATE 9999
+#define MAX_INT_GENERATE 999
 
 //-----------------------------------
 // ESTRUTURAS DE MEMORIA
@@ -41,6 +41,35 @@ int sort_int(int min, int max){
     return num;
 }
 
+void print_ram_line(RamLine r_line){
+    printf("-----------------------------------\n");
+    printf("[%d] |", r_line.identificator);
+    printf(" Content: %d |", r_line.content);
+    printf(" BlockID: %d\n", r_line.blockID);
+}
+/*
+void print_ram(RamLine r_lines[MAX_RAM_LINES]){
+    int i;
+    for(i = 0; i < MAX_RAM_LINES; i++){
+        print_ram_line(r_lines[i]);
+    }
+}
+*/
+void print_full_ram(RamLine m_ram[MAX_RAM_LINES]){
+    int aux = 1;
+    for(int i = 0; i < MAX_RAM_LINES; i++){
+        if(aux == 1){
+            printf("----------------------------------------------------\n");
+        }
+        printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_ram[i].identificator, m_ram[i].content, m_ram[i].blockID);
+        aux++;
+        if(aux == MEMORY_BLOCK_SIZE){
+            aux = 0;
+        }
+    }
+    printf("----------------------------------------------------\n");
+}
+
 void main(){
     RamLine m_ram[MAX_RAM_LINES];
     CacheLine m_cache[MAX_CACHE_LINES];
@@ -49,13 +78,13 @@ void main(){
     int filled_lines = 0;
 
     for(int i = 0; i < MAX_RAM_LINES; i++){
-        m_ram[i].content = sort_int(0, MAX_INT_GENERATE);
+        m_ram[i].content = sort_int(100, MAX_INT_GENERATE);
         m_ram[i].identificator = i;
         if(filled_lines < MEMORY_BLOCK_SIZE) {
             filled_lines++;
             m_ram[i].blockID = filled_blocks;
         }else{
-            filled_lines = 0;
+            filled_lines = 1;
             filled_blocks++;
             m_ram[i].blockID = filled_blocks;
         }
@@ -67,7 +96,7 @@ void main(){
         m_cache[i].update_count = 0;
     }
 
-    for(int i = 0; i < MAX_RAM_LINES; i++){
-        printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_ram[i].identificator, m_ram[i].content, m_ram[i].blockID);
-    }
+    print_full_ram(m_ram);
+    //print_ram_line(m_ram[85]);
+    //print_ram(m_ram);
 }
