@@ -29,7 +29,6 @@ typedef struct {
     int update_count;                  //contador de atualizações
     RamLine r_lines[MEMORY_BLOCK_SIZE];//vetor de linhas provenientes da RAM //m_cache[i].r_lines[j].content//
 } CacheLine;
-
 //-----------------------------------
 // FUNCOES GERAIS
 //-----------------------------------
@@ -43,29 +42,21 @@ int sort_int(int min, int max){
 
 //Imprime uma certa linha da memória RAM
 void print_ram_line(RamLine r_line){
-    printf("-----------------------------------\n");
+    printf("---------------------------------\n");
     printf("[%d] |", r_line.identificator);
     printf(" Content: %d |", r_line.content);
     printf(" BlockID: %d\n", r_line.blockID);
 }
 
-/*
-void print_ram(RamLine r_lines[MAX_RAM_LINES]){
-    int i;
-    for(i = 0; i < MAX_RAM_LINES; i++){
-        print_ram_line(r_lines[i]);
-    }
-}
-*/
-
 //Imprime a memória RAM completa
-void print_full_ram(RamLine m_ram[MAX_RAM_LINES]){
+void print_full_ram(RamLine r_lines[MAX_RAM_LINES]){
+    int i;
     int aux = 1;
-    for(int i = 0; i < MAX_RAM_LINES; i++){
+    for(i = 0; i < MAX_RAM_LINES; i++){
         if(aux == 1){
             printf("----------------------------------------------------\n");
         }
-        printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_ram[i].identificator, m_ram[i].content, m_ram[i].blockID);
+        print_ram_line(r_lines[i]);
         aux++;
         if(aux == MEMORY_BLOCK_SIZE){
             aux = 0;
@@ -74,6 +65,7 @@ void print_full_ram(RamLine m_ram[MAX_RAM_LINES]){
     printf("----------------------------------------------------\n");
 }
 
+//Imprime a memória CACHE completa
 void print_full_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     printf("----------------------------------------------------\n");
     for(int i = 0; i < MAX_CACHE_LINES; i++){
@@ -89,6 +81,7 @@ void print_full_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     }
     
 }
+
 //Altera o conteúdo de uma linha da memória RAM
 void change_line_content(RamLine *r_line){
     r_line->content = 999;
@@ -161,6 +154,8 @@ void select_method(int *option){
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void main(){
     RamLine m_ram[MAX_RAM_LINES];
     CacheLine m_cache[MAX_CACHE_LINES];
