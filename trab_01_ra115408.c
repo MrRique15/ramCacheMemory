@@ -84,8 +84,8 @@ void print_full_cache(CacheLine m_cache[MAX_CACHE_LINES]){
 }
 
 //Altera o conteúdo de uma linha da memória RAM
-void change_line_content(RamLine *r_line){
-    r_line->content = 999;
+void change_line_content(RamLine *r_line, int content){
+    r_line->content = content;
 }
 
 //Inicializa a RAM com números aleatórios em cada linha
@@ -107,6 +107,51 @@ void initialize_ram(RamLine m_ram[MAX_RAM_LINES]){
     }
 }
 
+//Coloca um bloco da memória RAM em alguma posição da memória CACHE
+void fill_cache_line(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_LINES], int ram_line_number){
+    int found = 0, block = m_ram[ram_line_number].blockID, count = 0;
+
+    for(int i = 0; i < MAX_CACHE_LINES; i++){
+        if(m_cache[i].filled == 0){
+            for(int j = 0; j < MAX_RAM_LINES; j++){
+                if(count < MEMORY_BLOCK_SIZE && m_ram[j].blockID == m_ram[ram_line_number].blockID){
+                    m_cache[i].r_lines[count].content = m_ram[j].content;
+                    m_cache[i].r_lines[count].identificator = m_ram[j].identificator;
+                    m_cache[i].r_lines[count].blockID = m_ram[j].blockID;
+                    count++;
+                }
+            }
+            m_cache[i].filled = 1;
+            break;
+        }
+    }
+    if(found == 0){
+        printf("Erro ao preencher a cache\n");
+    }
+}
+
+void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_LINES]){
+    int resp = 0, found = 0;
+
+    printf("Insira o número da linha que deseja acessar: \n");
+    scanf("%d", &resp);
+    for(int i = 0; i < MAX_CACHE_LINES; i++){
+        if(m_cache[i].filled == 1){
+            for(int j = 0; j < MEMORY_BLOCK_SIZE; j++){
+                if(m_cache[i].r_lines[j].identificator == resp){
+                    m_cache[i].acess_count++;
+                    found = 1;
+                    printf("O conteúdo da linha %d já está registrado na memória CACHE\n", resp);
+                }
+            }
+        }
+    }
+    if(found == 0){
+        printf("O conteúdo da linha %d não está registrado na memória CACHE\n", resp);
+        fill_cache_line(m_cache, m_ram,resp);
+    }
+    
+}
 //Inicializa a memória cache, deixando-a vazia
 void initialize_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     for(int i = 0; i < MAX_CACHE_LINES; i++){
@@ -129,6 +174,7 @@ int main_menu(){
     printf("1 - Mostrar toda a memória RAM\n");
     printf("2 - Mostrar toda a memória Cache\n");
     printf("3 - Selecionar método de alteração da CACHE (padrao - aleatorio)\n");
+    printf("4 - Acessar registros da RAM\n");
     scanf("%d", &option);
     return option;
 }
@@ -194,6 +240,10 @@ void main(){
 
             case 3:
                 select_method(&metodo);
+            break;
+
+            case 4:
+                acess_ram_register(m_cache, m_ram);
             break;
 
             default:
