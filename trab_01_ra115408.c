@@ -3,11 +3,11 @@
 #include <string.h>
 #include <math.h>
 
-#define MAX_RAM_LINES 100
+#define MAX_RAM_LINES 1000
 #define MEMORY_BLOCK_SIZE 5
 #define MEMORY_BLOCKS (MAX_RAM_LINES / MEMORY_BLOCK_SIZE)
 
-#define MAX_CACHE_LINES 2
+#define MAX_CACHE_LINES 5
 
 #define MIN_INT_GENERATE 100
 #define MAX_INT_GENERATE 999
