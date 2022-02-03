@@ -11,6 +11,7 @@
 
 #define MIN_INT_GENERATE 100
 #define MAX_INT_GENERATE 999
+#define CLEAR_SCREEN "clear"
 
 //-----------------------------------
 // ESTRUTURAS DE MEMORIA
@@ -122,6 +123,7 @@ void fill_cache_line(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_L
                 }
             }
             m_cache[i].filled = 1;
+            found = 1;
             break;
         }
     }
@@ -153,6 +155,7 @@ void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RA
     }
     
 }
+
 //Inicializa a memória cache, deixando-a vazia
 void initialize_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     for(int i = 0; i < MAX_CACHE_LINES; i++){
@@ -178,6 +181,7 @@ int main_menu(){
     printf("3 - Selecionar método de alteração da CACHE (padrao - aleatorio)\n");
     printf("4 - Acessar registros da RAM\n");
     scanf("%d", &option);
+    system(CLEAR_SCREEN);
     return option;
 }
 
@@ -213,17 +217,7 @@ void main(){
     infos_start();
     initialize_ram(m_ram);
     initialize_cache(m_cache);
-    
-    /*
-    m_cache[1].filled = 1;
-    m_cache[1].acess_count = 1;
-    m_cache[1].update_count = 1;
-    m_cache[1].r_lines[0] = m_ram[0];
-    m_cache[1].r_lines[1] = m_ram[1];
-    m_cache[1].r_lines[2] = m_ram[2];
-    m_cache[1].r_lines[3] = m_ram[3];
-    m_cache[1].r_lines[4] = m_ram[4];
-    */
+
     do{
         resp = main_menu();
 
