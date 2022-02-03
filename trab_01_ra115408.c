@@ -110,7 +110,7 @@ void print_full_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     
 }
 
-//Altera o conteúdo de uma linha da memória RAM
+//Altera o conteúdo de uma linha da memória RAM, dentro da estrutura da LINHA
 void change_line_content(RamLine *r_line, int content){
     r_line->content = content;
 }
@@ -191,7 +191,7 @@ void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RA
                         printf("Registro alterado com sucesso!\n");
                         print_full_cache(m_cache);
                     }else{
-                        printf("O conteúdo da linha %d não foi alterado\n", resp);
+                        printf("O conteúdo da linha %d foi mantido\n", resp);
                     }
                 }
             }
@@ -222,7 +222,7 @@ void infos_start(){
 
 int main_menu(){
     int option;
-    printf("Opções Disponíveis:\n");
+    printf("\n\nOpções Disponíveis:\n");
     printf("0 - Encerrar\n");
     printf("1 - Mostrar toda a memória RAM\n");
     printf("2 - Mostrar toda a memória Cache\n");
