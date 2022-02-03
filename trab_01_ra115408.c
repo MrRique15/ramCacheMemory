@@ -142,14 +142,15 @@ void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RA
                 if(m_cache[i].r_lines[j].identificator == resp){
                     m_cache[i].acess_count++;
                     found = 1;
-                    printf("O conteúdo da linha %d já está registrado na memória CACHE\n", resp);
+                    printf("O conteúdo da linha %d já está registrado na LINHA: %d da memória CACHE\n", resp, i);
+                    print_full_cache(m_cache);
                 }
             }
         }
     }
     if(found == 0){
         printf("O conteúdo da linha %d não está registrado na memória CACHE\n", resp);
-        fill_cache_line(m_cache, m_ram,resp);
+        fill_cache_line(m_cache,m_ram,resp);
     }
     
 }
