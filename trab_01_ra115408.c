@@ -217,11 +217,10 @@ void main(){
     initialize_cache(m_cache);
 
     do{
-        resp = main_menu();
-
-        switch(resp){
+        switch(main_menu()){
             case 0:
                 shutdown_message();
+                resp = 0;
             break;
 
             case 1:
