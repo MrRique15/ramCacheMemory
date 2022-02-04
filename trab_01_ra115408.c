@@ -250,25 +250,29 @@ void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RA
 
     printf("Insira o número da linha que deseja acessar: \n");
     scanf("%d", &resp);
-    for(int i = 0; i < MAX_CACHE_LINES; i++){
-        if(m_cache[i].filled == 1){
-            for(int j = 0; j < MEMORY_BLOCK_SIZE; j++){
-                if(m_cache[i].r_lines[j].identificator == resp){
-                    m_cache[i].acess_count++;
-                    found = 1;
-                    printf("O conteúdo da linha %d já está registrado na LINHA: %d, posição %d da memória CACHE\n", resp, i, j);
-                    print_full_cache(m_cache);
-                    printf("Deseja alterar esse registro? (1 - Sim / 0 - Não)\n");
-                    scanf("%d", &respSelect);
-                    if(respSelect == 1){
-                        printf("Insira o novo conteúdo para a linha %d: \n", resp);
-                        scanf("%d", &resptwo);
-                        change_line_content(&m_cache[i].r_lines[j], resptwo);
-                        m_cache[i].update_count++;
-                        printf("Registro alterado com sucesso!\n");
+    if(resp > MAX_RAM_LINES-1 || resp < 0){
+        printf("Linha indisponível na memória RAM\n");
+    }else{
+        for(int i = 0; i < MAX_CACHE_LINES; i++){
+            if(m_cache[i].filled == 1){
+                for(int j = 0; j < MEMORY_BLOCK_SIZE; j++){
+                    if(m_cache[i].r_lines[j].identificator == resp){
+                        m_cache[i].acess_count++;
+                        found = 1;
+                        printf("O conteúdo da linha %d já está registrado na LINHA: %d, posição %d da memória CACHE\n", resp, i, j);
                         print_full_cache(m_cache);
-                    }else{
-                        printf("O conteúdo da linha %d foi mantido\n", resp);
+                        printf("Deseja alterar esse registro? (1 - Sim / 0 - Não)\n");
+                        scanf("%d", &respSelect);
+                        if(respSelect == 1){
+                            printf("Insira o novo conteúdo para a linha %d: \n", resp);
+                            scanf("%d", &resptwo);
+                            change_line_content(&m_cache[i].r_lines[j], resptwo);
+                            m_cache[i].update_count++;
+                            printf("Registro alterado com sucesso!\n");
+                            print_full_cache(m_cache);
+                        }else{
+                            printf("O conteúdo da linha %d foi mantido\n", resp);
+                        }
                     }
                 }
             }
