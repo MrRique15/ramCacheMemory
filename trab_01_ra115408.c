@@ -347,6 +347,8 @@ void main(){
         mapFifo[i] = -1;
     }
 
+    int timeTest = time(0);
+
     srand(time(0));
     infos_start();
     initialize_ram(m_ram);
@@ -356,6 +358,7 @@ void main(){
         switch(main_menu()){
             case 0:
                 shutdown_message();
+                printf("Tempo total de simulação: %.2f segundos\n", (float)(time(0) - timeTest));
                 resp = 0;
             break;
 
