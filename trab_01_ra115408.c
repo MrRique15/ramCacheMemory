@@ -11,73 +11,46 @@
 #define MIN_INT_GENERATE 100
 #define MAX_INT_GENERATE 999
 #define CLEAR_SCREEN "clear"
-#define TRUE 1
-#define FALSE 0
 
-//lfu - usado com menor frequencia
-//lru - atualizado com menor frequencia
-//fifo - primeiro que entrou, sai primeiro, o mais velho sai primeiro
+// 1 = debug mode on, 0 = debug mode off
+#define DEBUG 0
 
-//-----------------------------------
-// ESTRUTURAS DE MEMORIA
-//-----------------------------------
-//Estrutura contendo os dados de uma linha da memoria principal
+/*
+--------------------------------------------------------------
+-- DATA STRUCTURES TO CREATE VIRTUAL RAM AND CACHE MEMORIES --
+--------------------------------------------------------------
+*/
+//Struct to create a virtual ram line, with content, line number and the block that line is in.
 typedef struct {
-    int content;          // conteudo da linha
-    int identificator;    //Identificador da linha dentro da RAM
-    int blockID;          //Identificador do bloco da linha dentro da RAM
+    int content;          //Line Content
+    int identificator;    //Line Number
+    int blockID;          //RAM Block ID
 } RamLine;
 
-//Estrutura contendo os dados de UMA linha da memória cache, utilizando um vetor que contém um numero MEMORY_BLOCK_SIZE de linhas provenientes da RAM
+/*
+Struct to create a virtual cache line, with the filled or not controller, acces count, update cound and
+the content of the cache line being an array of ram lines.
+*/
 typedef struct {
-    int filled;                        //0 - vazio, 1 - preenchido
-    int acess_count;                   //contador de acessos
-    int update_count;                  //contador de atualizações
-    RamLine r_lines[MEMORY_BLOCK_SIZE];//vetor de linhas provenientes da RAM //m_cache[i].r_lines[j].content//
+    int filled;                        //0 - empty, 1 - filled
+    int acess_count;                   
+    int update_count;                  
+    RamLine r_lines[MEMORY_BLOCK_SIZE];//RAM Lines array.
 } CacheLine;
-//-----------------------------------
-// FUNCOES GERAIS
-//-----------------------------------
 
-//Gera um numero inteiro indo de MIN_INT_GENERATE ate MAX_INT_GENERATE
-int sort_int(int min, int max){
-    int num;
-    num = rand() % (max - min + 1) + min;
-    return num;
-}
-
-//função para analisar se há linhas vazias na cache, caso haja, retorna uma linha vazia aleatória
-int has_empty_lines(CacheLine m_cache[MAX_CACHE_LINES]){
-    int empty_lines = 0;
-    for(int i = 0; i < MAX_CACHE_LINES; i++){
-        if(m_cache[i].filled == 0){
-            empty_lines++;
-        }
-    }
-    if(empty_lines == 0){
-        return -1;
-    }else{
-        int lines_to_fill[empty_lines];
-        for(int i = 0, j = 0; i < MAX_CACHE_LINES; i++){
-            if(m_cache[i].filled == 0){
-                lines_to_fill[j] = i;
-                j++;
-            }
-        }
-        int random_line = rand() % empty_lines;
-        return lines_to_fill[random_line];
-    }
-}
-
-//Imprime uma certa linha da memória RAM
+/*
+------------------------------------------------------------------------------------------------------
+-- CORE FUNCTIONS, TO CONTROL THE RAM AND CACHE MEMORIES, ORGANIZE THE DATA AND MAKE THE OPERATIONS --
+------------------------------------------------------------------------------------------------------
+*/
+//Function to print a full RAM line, with line number, content and block ID.
 void print_ram_line(RamLine r_line){
     printf("---------------------------------\n");
     printf("[%d] |", r_line.identificator);
     printf(" Content: %d |", r_line.content);
     printf(" BlockID: %d\n", r_line.blockID);
 }
-
-//Imprime a memória RAM completa
+//Function to print the full virtual RAM memory.
 void print_full_ram(RamLine r_lines[MAX_RAM_LINES]){
     int i;
     int aux = 1;
@@ -93,67 +66,81 @@ void print_full_ram(RamLine r_lines[MAX_RAM_LINES]){
     }
     printf("----------------------------------------------------\n");
 }
-
-//Imprime a memória CACHE completa
+//Function to print the full virtual CACHE memory.
 void print_full_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     printf("----------------------------------------------------\n");
     for(int i = 0; i < MAX_CACHE_LINES; i++){
-        //printf("[%d] | Preenchido: %d | Acessos: %d | Atualizações: %d\n", i, m_cache[i].filled, m_cache[i].acess_count, m_cache[i].update_count);
         printf("[%d]", i);
         if(m_cache[i].filled == 1){
             for(int j = 0; j < MEMORY_BLOCK_SIZE; j++){
-                //printf("[%d] | Conteúdo: %d | Bloco: %d\n", m_cache[i].r_lines[j].identificator, m_cache[i].r_lines[j].content, m_cache[i].r_lines[j].blockID);
                 printf(" | %d", m_cache[i].r_lines[j].content);
             }
         }
         printf("\n");
         printf("----------------------------------------------------\n");
-    }
-    
+    }  
 }
-
-//Altera o conteúdo de uma linha da memória RAM, dentro da estrutura da LINHA
-void change_line_content(RamLine *r_line, int content){
-    r_line->content = content;
-}
-
-//Inicializa a RAM com números aleatórios em cada linha
-void initialize_ram(RamLine m_ram[MAX_RAM_LINES]){
-    int filled_blocks = 0;
-    int filled_lines = 0;
-
-    for(int i = 0; i < MAX_RAM_LINES; i++){
-        m_ram[i].content = sort_int(MIN_INT_GENERATE, MAX_INT_GENERATE);
-        m_ram[i].identificator = i;
-        if(filled_lines < MEMORY_BLOCK_SIZE) {
-            filled_lines++;
-            m_ram[i].blockID = filled_blocks;
-        }else{
-            filled_lines = 1;
-            filled_blocks++;
-            m_ram[i].blockID = filled_blocks;
-        }
-    }
-}
-
+//Function to show the FIFO map of used CACHE lines, in order.
 void debugFifo(int mapFifo[MAX_CACHE_LINES]){
-    printf("\nOrdens de linhas utilizadas da CACHE: ");
+    printf("Mapeamento FIFO de linhas utilizadas da CACHE: ");
     for(int a = 0; a < MAX_CACHE_LINES; a++){
         printf("%d ", mapFifo[a]);
     }
     printf("\n\n");
 }
 
-//Função para registrar um acesso na cache, quando não existem linhas vazias na cache
+//Function to generate a random integer number, from MIN_INT_GENERATE to MAX_INT_GENERATE
+int sort_int(int min, int max){
+    int num;
+    num = rand() % (max - min + 1) + min;
+    return num;
+}
+
+//Function to change the content into a line that has RamLine type.
+void change_line_content(RamLine *r_line, int content){
+    r_line->content = content;
+}
+
+/*
+Function to analize the content of the cache line, to see if it is filled or not, if there is any empty line,
+the function will return an aleatory line to be filled.
+*/
+int has_empty_lines(CacheLine m_cache[MAX_CACHE_LINES]){
+    int empty_lines = 0;
+    for(int i = 0; i < MAX_CACHE_LINES; i++){
+        if(m_cache[i].filled == 0){
+            empty_lines++;
+        }
+    }
+    if(empty_lines == 0){
+        return -1;
+    }else{
+        int lines_to_fill[empty_lines];
+
+        for(int i = 0, j = 0; i < MAX_CACHE_LINES; i++){
+            if(m_cache[i].filled == 0){
+                lines_to_fill[j] = i;
+                j++;
+            }
+        }
+
+        int random_line = rand() % empty_lines;
+        return lines_to_fill[random_line];
+    }
+}
+
+//Function to insert some registers in the cache line, if there is any empty line.
 void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int ram_line_number, int method, int mapFifo[MAX_CACHE_LINES]){
     int random_line = rand() % MAX_CACHE_LINES;
     int lineAux = 0, fifoMapped = 0, fifoAux = 0;
     switch (method)
     {
         case 1:
-            printf("Inserindo registro em posição aleatória: %d na memória CACHE\n", random_line);
+            printf("Inserindo registro em posição ALEATORIA: %d na memória CACHE\n", random_line);
 
-            debugFifo(mapFifo);
+            if(DEBUG){
+                debugFifo(mapFifo);
+            }
 
             for(int i = 0; i < MEMORY_BLOCK_SIZE; i++){
                 lineAux = m_cache[random_line].r_lines[i].identificator;
@@ -161,8 +148,11 @@ void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int r
                 m_cache[random_line].r_lines[i] = m_ram[ram_line_number];
                 m_cache[random_line].acess_count = 0;
                 m_cache[random_line].update_count = 0;
-                printf("Realizando escrita writeBack na memória RAM para a LINHA: %d...\n", lineAux);
+                if(DEBUG){
+                    printf("Realizando escrita writeBack na memória RAM para a LINHA: %d...\n", lineAux);
+                }
             }
+
             for(int w = 0; w < MAX_CACHE_LINES-1; w++){
                 if(mapFifo[w] == random_line){
                     fifoAux = mapFifo[w];
@@ -171,15 +161,20 @@ void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int r
                    
                 }
             }
+
             printf("O regitro foi inserido com sucesso na LINHA: %d da memória CACHE\n", random_line);
 
-            debugFifo(mapFifo);
+            if(DEBUG){
+                debugFifo(mapFifo);
+            }
         break;
 
-        case 2:  //FIFO
+        case 2:
             printf("Inserindo registro com método FIFO na memória CACHE\n");
 
-            debugFifo(mapFifo);
+            if(DEBUG){
+                debugFifo(mapFifo);
+            }
 
             for(int i = 0; i < MEMORY_BLOCK_SIZE; i++){
                 lineAux = m_cache[mapFifo[0]].r_lines[i].identificator;
@@ -187,20 +182,22 @@ void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int r
                 m_cache[mapFifo[0]].r_lines[i] = m_ram[ram_line_number];
                 m_cache[mapFifo[0]].acess_count = 0;
                 m_cache[mapFifo[0]].update_count = 0;
-                printf("Realizando escrita writeBack na memória RAM para a LINHA: %d...\n", lineAux);
+                if(DEBUG){
+                    printf("Realizando escrita writeBack na memória RAM para a LINHA: %d...\n", lineAux);
+                }
             }
+
             printf("O regitro foi inserido com sucesso na LINHA: %d da memória CACHE\n", mapFifo[0]);
+            
             for(int w = 0; w < MAX_CACHE_LINES-1; w++){
                 fifoAux = mapFifo[w];
                 mapFifo[w] = mapFifo[w+1];
                 mapFifo[w+1] = fifoAux;
             }
 
-            debugFifo(mapFifo);
-        break;
-
-        case 3:  //LRU
-            printf("Lru");
+            if(DEBUG){
+                debugFifo(mapFifo);
+            }
         break;
 
         default:
@@ -209,14 +206,17 @@ void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int r
     }
 }
 
-//Coloca um bloco da memória RAM em alguma posição da memória CACHE
+/*
+Insert some RAM memory block into one cache line, analizing the content of the cache line, 
+to see if it is filled or not.
+*/
 void fill_cache_line(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_LINES], int ram_line_number, int method, int mapFifo[MAX_CACHE_LINES]){
     int found = 0, block = m_ram[ram_line_number].blockID, count = 0;
 
     int empty_line = has_empty_lines(m_cache);
     if(empty_line > -1){
         if(m_cache[empty_line].filled == 0){
-            printf("Inserindo registro na LINHA vazia: %d da memória CACHE\n", empty_line);
+            printf("Inserindo registro na linha VAZIA: %d da memória CACHE\n", empty_line);
             for(int j = 0; j < MAX_RAM_LINES; j++){
                 if(count < MEMORY_BLOCK_SIZE && m_ram[j].blockID == m_ram[ram_line_number].blockID){
                     m_cache[empty_line].r_lines[count].content = m_ram[j].content;
@@ -238,13 +238,18 @@ void fill_cache_line(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_L
             printf("Erro interno ao encontrar linha vazia na memória cache\n");
         }
     }else{
-        printf("Não existem linhas vazias na memória CACHE\n");
+        if(DEBUG){
+            printf("Não existem linhas vazias na memória CACHE\n");
+        }
         fill_cache_line_two(m_cache, m_ram, ram_line_number, method, mapFifo);
-        //Implementar código para acessar posições já preenchidar e devolver os valores à RAM
     }
 }
 
-//Acessar registro da RAM e armazená-lo na memória CACHE
+/*
+Function to try acessing some RAM line content, if the line is already registered into the cache, the function will show
+the full cache memory, and ask for modifications on that line content, but this alteration will not be made in the RAM
+memory, it will be done in the cache memory and then will be written back to the RAM memory when it is needed.
+*/
 void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_LINES], int method, int mapFifo[MAX_RAM_LINES]){
     int resp = 0, found = 0, resptwo = 0, respSelect = 0;
 
@@ -279,13 +284,34 @@ void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RA
         }
     }
     if(found == 0){
-        printf("O conteúdo da linha %d não está registrado na memória CACHE\n", resp);
+        if(DEBUG){
+            printf("Não existe registro na memória CACHE para a linha %d\n", resp);
+        }
         fill_cache_line(m_cache, m_ram, resp, method, mapFifo);
     }
     
 }
 
-//Inicializa a memória cache, deixando-a vazia
+//Function to initialize the RAM memory, full of random numbers in it lines.
+void initialize_ram(RamLine m_ram[MAX_RAM_LINES]){
+    int filled_blocks = 0;
+    int filled_lines = 0;
+
+    for(int i = 0; i < MAX_RAM_LINES; i++){
+        m_ram[i].content = sort_int(MIN_INT_GENERATE, MAX_INT_GENERATE);
+        m_ram[i].identificator = i;
+        if(filled_lines < MEMORY_BLOCK_SIZE) {
+            filled_lines++;
+            m_ram[i].blockID = filled_blocks;
+        }else{
+            filled_lines = 1;
+            filled_blocks++;
+            m_ram[i].blockID = filled_blocks;
+        }
+    }
+}
+
+//Function to initialize the virtual CACHE, full of empty lines.
 void initialize_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     for(int i = 0; i < MAX_CACHE_LINES; i++){
         m_cache[i].filled = 0;
@@ -294,16 +320,19 @@ void initialize_cache(CacheLine m_cache[MAX_CACHE_LINES]){
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+------------------------------------------------------
+-- FUNCTIONS TO SHOW MESSAGES AND MENUS TO THE USER --
+------------------------------------------------------
+*/
 void infos_start(){
     printf("----------------------------------------------------\n");
-    printf("\t\t\tSimulador de Memória Cache\n");
+    printf("\tSimulador de Memória Cache\n");
     printf("----------------------------------------------------\n");
 }
-
 int main_menu(){
     int option;
-    printf("\n\nOpções Disponíveis:\n");
+    printf("\nOpções Disponíveis:\n");
     printf("0 - Encerrar\n");
     printf("1 - Mostrar toda a memória RAM\n");
     printf("2 - Mostrar toda a memória Cache\n");
@@ -313,20 +342,17 @@ int main_menu(){
     system(CLEAR_SCREEN);
     return option;
 }
-
 void invalid_option(){
     printf("Opção Inválida!\n");
 }
 void shutdown_message(){
     printf("Somulação sendo encerrada...\n");
 }
-
 void select_method(int *option){
     printf("----------------------------------------------------\n");
     printf("Escolha uma opção:\n");
     printf("1 - Aleatório\n");
     printf("2 - FIFO\n");
-    printf("3 - LRU\n");
     scanf("%d", option);
     if (*option < 1 || *option > 3){
         invalid_option();
@@ -336,8 +362,11 @@ void select_method(int *option){
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+--------------------------------------
+-- MAIN FUNCTION TO RUN THE PROGRAM --
+--------------------------------------
+*/
 void main(){
     RamLine m_ram[MAX_RAM_LINES];
     CacheLine m_cache[MAX_CACHE_LINES];
@@ -358,7 +387,9 @@ void main(){
         switch(main_menu()){
             case 0:
                 shutdown_message();
-                printf("Tempo total de simulação: %.2f segundos\n", (float)(time(0) - timeTest));
+                if(DEBUG){
+                    printf("Tempo total de simulação: %.2f segundos\n", (float)(time(0) - timeTest));
+                }
                 resp = 0;
             break;
 
