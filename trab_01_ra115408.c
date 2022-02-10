@@ -387,9 +387,6 @@ void main(){
         switch(main_menu()){
             case 0:
                 shutdown_message();
-                if(DEBUG){
-                    printf("Tempo total de simulação: %.2f segundos\n", (float)(time(0) - timeTest));
-                }
                 resp = 0;
             break;
 
@@ -414,4 +411,8 @@ void main(){
             break;
         }
     } while(resp != 0);
+    
+    if(DEBUG){
+        printf("Tempo total de simulação: %.2f segundos\n", (float)(time(0) - timeTest));
+    }
 }
