@@ -4,17 +4,17 @@
 #include <math.h>
 #include <time.h>
 
-#define MAX_RAM_LINES 50
-#define MEMORY_BLOCK_SIZE 5
+#define MAX_RAM_LINES 4096
+#define MEMORY_BLOCK_SIZE 4
 #define MEMORY_BLOCKS (MAX_RAM_LINES / MEMORY_BLOCK_SIZE)
-#define MAX_CACHE_LINES 5
+#define MAX_CACHE_LINES 4
 #define MIN_INT_GENERATE 100
 #define MAX_INT_GENERATE 999
 #define CLEAR_SCREEN "clear"
 
+//Some useful information can be shown on screen while true, but final user don´t need to see it.
 // 1 = debug mode on, 0 = debug mode off
 #define DEBUG 0
-
 /*
 --------------------------------------------------------------
 -- DATA STRUCTURES TO CREATE VIRTUAL RAM AND CACHE MEMORIES --
@@ -88,19 +88,16 @@ void debugFifo(int mapFifo[MAX_CACHE_LINES]){
     }
     printf("\n\n");
 }
-
 //Function to generate a random integer number, from MIN_INT_GENERATE to MAX_INT_GENERATE
 int sort_int(int min, int max){
     int num;
     num = rand() % (max - min + 1) + min;
     return num;
 }
-
 //Function to change the content into a line that has RamLine type.
 void change_line_content(RamLine *r_line, int content){
     r_line->content = content;
 }
-
 /*
 Function to analize the content of the cache line, to see if it is filled or not, if there is any empty line,
 the function will return an aleatory line to be filled.
@@ -128,7 +125,6 @@ int has_empty_lines(CacheLine m_cache[MAX_CACHE_LINES]){
         return lines_to_fill[random_line];
     }
 }
-
 //Function to insert some registers in the cache line, if there is any empty line.
 void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int ram_line_number, int method, int mapFifo[MAX_CACHE_LINES]){
     int random_line = rand() % MAX_CACHE_LINES;
@@ -205,7 +201,6 @@ void fill_cache_line_two(CacheLine *m_cache, RamLine m_ram[MAX_RAM_LINES], int r
         break;
     }
 }
-
 /*
 Insert some RAM memory block into one cache line, analizing the content of the cache line, 
 to see if it is filled or not.
@@ -244,7 +239,6 @@ void fill_cache_line(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RAM_L
         fill_cache_line_two(m_cache, m_ram, ram_line_number, method, mapFifo);
     }
 }
-
 /*
 Function to try acessing some RAM line content, if the line is already registered into the cache, the function will show
 the full cache memory, and ask for modifications on that line content, but this alteration will not be made in the RAM
@@ -291,7 +285,6 @@ void acess_ram_register(CacheLine m_cache[MAX_CACHE_LINES], RamLine m_ram[MAX_RA
     }
     
 }
-
 //Function to initialize the RAM memory, full of random numbers in it lines.
 void initialize_ram(RamLine m_ram[MAX_RAM_LINES]){
     int filled_blocks = 0;
@@ -319,7 +312,6 @@ void initialize_cache(CacheLine m_cache[MAX_CACHE_LINES]){
         m_cache[i].update_count = 0;
     }
 }
-
 /*
 ------------------------------------------------------
 -- FUNCTIONS TO SHOW MESSAGES AND MENUS TO THE USER --
@@ -361,7 +353,6 @@ void select_method(int *option){
         printf("----------------------------------------------------\n");
     }
 }
-
 /*
 --------------------------------------
 -- MAIN FUNCTION TO RUN THE PROGRAM --
